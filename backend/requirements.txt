@@ -1,0 +1,9 @@
+requests
+python-dotenv
+django
+djangorestframework
+google-generativeai
+langchain
+langchain-google-genai
+pillow
+langchain_community

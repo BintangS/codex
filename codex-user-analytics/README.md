@@ -1,0 +1,1 @@
+This will be the plugin that need to be installed in user HTML for retrieving user activities
