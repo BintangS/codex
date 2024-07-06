@@ -16,7 +16,8 @@
     <title> dashboard LIVE stream data</title>
 
     <script>
-        const socket = new WebSocket('ws://localhost:8000/ws/recordings/');
+        const sessionId = '123';
+        const socket = new WebSocket('ws://localhost:8000/ws/recordings/' + sessionId + '/');
         var events = []
         let player = null;
 

@@ -9,7 +9,7 @@ from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
-from .models import Session, Recording
+from codex.models import Session, Recording
 from codex.consumers import session_data
 
 
@@ -49,17 +49,15 @@ def list_sessions(request):
     return JsonResponse(sessions, safe=False)
 
 @require_http_methods(["GET"])
-def get_heatmap_data(request, session_id):
-    if session_id in session_data:
-        return JsonResponse(session_data[session_id], safe=False)
-    else:
-        try:
-            recording = Recording.objects.get(session__id=session_id)
-            print(recording)
-            return JsonResponse(recording.data, safe=False)
-        except Recording.DoesNotExist:
-            return JsonResponse({'error': 'Session not found'}, status=404)
+def get_recording_data(request, session_id):
+    try:
+        listOfRecordings = Recording.objects.filter(session_id=session_id)
+        recordings = [{'session_id': recording.session_id, 'data': recording.data} for recording in listOfRecordings]
+        return JsonResponse(recordings, safe=False)
+    except Recording.DoesNotExist:
+        return JsonResponse({'error': 'Session not found'}, status=404)
 
+@csrf_exempt
 @require_http_methods(["DELETE"])
 def delete_session(request, session_id):
     try:

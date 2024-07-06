@@ -20,6 +20,9 @@ class RecordingConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_add(self.DEFAULT_GROUP_NAME, self.channel_name)
         await self.accept()
 
+        # create session in when socket is connected
+        await self.create_session(self.session_id)
+
     async def disconnect(self, close_code):
         # On disconnect, save the recording data to the database
         if self.session_id in session_data:
@@ -30,11 +33,18 @@ class RecordingConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_discard(self.DEFAULT_GROUP_NAME, self.channel_name)
 
     @database_sync_to_async
+    def create_session(self, session_id):
+        return Session.objects.update_or_create(id=session_id, defaults={ 'active': True })
+
+    @database_sync_to_async
     def save_session_data(self, session_id):
-        session, created = Session.objects.get_or_create(id=session_id)
+        session = Session.objects.get(id=session_id)
         session.active = False
         session.save()
-        Recording.objects.create(session=session, data=session_data[session_id])
+
+        # save recording data to the database
+        print(f"Saving data for session {session_id}: {session_data[session_id]}")
+        Recording.objects.update_or_create(session=session, data=session_data[session_id])
 
     async def receive(self, text_data):
         data = json.loads(text_data)
@@ -44,21 +54,24 @@ class RecordingConsumer(AsyncWebsocketConsumer):
 
         # Handle recording events
         if event_name == 'recording':
-            events = event_data.get('events', [])
-            heatmap_data = session_data.get(session_id, [])
+            events = event_data
+            # heatmap_data = session_data.get(session_id, [])
 
-            for event in events:
-                if event['type'] == 3 and 'x' in event['data'] and 'y' in event['data']:  # Ensure the event has coordinates
-                    x, y = event['data']['x'], event['data']['y']
-                    heatmap_data.append((x, y))
+            # comment out heatmap feature for now
+            # for event in events:
+            #     if event['type'] == 3 and 'x' in event['data'] and 'y' in event['data']:  # Ensure the event has coordinates
+            #         x, y = event['data']['x'], event['data']['y']
+            #         heatmap_data.append((x, y))
 
             # Store the heatmap data in the dictionary
-            session_data[session_id] = heatmap_data
-            print(f"Data for session {session_id}: {session_data[session_id]}")  # Debugging line
+            if session_id in session_data:
+                session_data[session_id].append(events)
+            else:
+                session_data[session_id] = [events]
 
             # Broadcast the recording data to the group
             await self.channel_layer.group_send(self.DEFAULT_GROUP_NAME, {
-                'type': 'livestream',
+                'type': 'livestream', # this will call the "livestream" method
                 'text': json.dumps({
                     'event': 'livestream-data',
                     'data': event_data

@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
-from app import views
+from . import views
 from . import socketHandler
 
 
@@ -26,7 +26,7 @@ urlpatterns = [
     path('', views.heatmap_view, name='heatmap_view'),
     path('test/', views.test_page_view, name='test_page_view'),
     path('sessions/', views.list_sessions, name='list_sessions'),
-    path('sessions/<str:session_id>/', views.get_heatmap_data, name='get_heatmap_data'),
+    path('recordings/<str:session_id>/', views.get_recording_data, name='get_recording_data'),
     path('sessions/<str:session_id>/delete/', views.delete_session, name='delete_session'),
     path('admin/', admin.site.urls),
     path('api/prompt', views.simple_chat_bot_view, name='simpleChatbotView'),

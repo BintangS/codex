@@ -1,12 +1,14 @@
 
-    const socket = new WebSocket('ws://localhost:8000/ws/recordings/ ' );
+    const sessionId = '123'
+    const socket = new WebSocket('ws://localhost:8000/ws/recordings/' + sessionId + '/');
 
     socket.onopen = function(event) {
         rrweb.record({
             emit(event) {
                 socket.send(JSON.stringify({
                     event_name: 'recording',
-                    event_data: event
+                    event_data: event,
+                    session_id: sessionId
                 }));
             }
         });
