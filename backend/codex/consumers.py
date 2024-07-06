@@ -1,14 +1,14 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 
-class ChatConsumer(AsyncWebsocketConsumer):
+class RecordingConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         await self.accept()
+
     async def disconnect(self, close_code):
         pass
+
     async def receive(self, text_data):
-        text_data_json = json.loads(text_data)
-        message = text_data_json['message']
-        await self.send(text_data=json.dumps({
-            'message': message
-}))
+        data = json.loads(text_data)
+        # Process the received data here (e.g., save to database)
+        print(data)
