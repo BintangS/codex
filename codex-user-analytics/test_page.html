@@ -16,7 +16,8 @@
     </style>
 </head>
 
-<body>
+<!-- userid should be added here dynamically -->
+<body style="background-image: url(http://localhost:3000/users_heatmap/1-heatmap.png); background-size: contain; background-repeat: no-repeat;">
     <div class="jumbotron text-center" style="margin-bottom:0">
         <h1> test page</h1>
         <p>Resize this responsive page to see the effect!</p>
@@ -26,10 +27,10 @@
         <div class="container-fluid">
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>                        
-      </button>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
                 <a class="navbar-brand" href="#">WebSiteName</a>
             </div>
             <div class="collapse navbar-collapse" id="myNavbar">
@@ -63,13 +64,17 @@
                 <h5>Title description, Dec 7, 2017</h5>
                 <div class="fakeimg">Fake Image</div>
                 <p>Some text..</p>
-                <p>Sunt in culpa qui officia deserunt mollit anim id est laborum consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco.</p>
+                <p>Sunt in culpa qui officia deserunt mollit anim id est laborum consectetur adipiscing elit, sed do
+                    eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
+                    exercitation ullamco.</p>
                 <br>
                 <h2>TITLE HEADING</h2>
                 <h5>Title description, Sep 2, 2017</h5>
                 <div class="fakeimg">Fake Image</div>
                 <p>Some text..</p>
-                <p>Sunt in culpa qui officia deserunt mollit anim id est laborum consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco.</p>
+                <p>Sunt in culpa qui officia deserunt mollit anim id est laborum consectetur adipiscing elit, sed do
+                    eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
+                    exercitation ullamco.</p>
             </div>
         </div>
     </div>
@@ -80,64 +85,69 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/rrweb@latest/dist/rrweb.min.js"></script>
     <script async src="record_session.js"></script>
-    
+
 
 </body>
- <script>
+<script>
 
     // Caputure user mouse activity and store in localstorage
     // Send logs after every 10 seconds to backend
     // clear localstorage after sent to backend
 
-        const ws = new WebSocket('ws://localhost:3000');
-        const LOCAL_STORAGE_KEY = 'activityLogs';
-        const SEND_INTERVAL = 10000; // 10 seconds
+    const ws = new WebSocket('ws://localhost:3000');
+    const LOCAL_STORAGE_KEY = 'activityLogs';
+    const SEND_INTERVAL = 10000; // 10 seconds
 
-        ws.onopen = () => {
-            console.log('Connected to server');
+    ws.onopen = () => {
+        console.log('Connected to server');
+    };
+
+    ws.onclose = () => {
+        console.log('Disconnected from server');
+    };
+
+    function sendActivityLog(activityLogs) {
+        if (ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ userId: 1, activityLogs })); // user id is hardcoded for now 
+        } else {
+            console.error('WebSocket is not open');
+        }
+    }
+
+    function logActivity(type, details) {
+        const activity = {
+            type: type,
+            details: details,
+            timestamp: new Date().toISOString()
         };
+        let storedLogs = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY)) || [];
+        storedLogs.push(activity);
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(storedLogs));
+    }
 
-        ws.onclose = () => {
-            console.log('Disconnected from server');
-        };
-
-        function sendActivityLog(activityLogs) {
-            if (ws.readyState === WebSocket.OPEN) {
-                ws.send(JSON.stringify({ userId: 1, activityLogs })); // user id is hardcoded for now 
-            } else {
-                console.error('WebSocket is not open');
-            }
+    function sendStoredLogs() {
+        console.log("Sending Logs at", new Date());
+        let storedLogs = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY)) || [];
+        if (storedLogs.length > 0) {
+            sendActivityLog(storedLogs);
+            localStorage.removeItem(LOCAL_STORAGE_KEY);
         }
+    }
 
-        function logActivity(type, details) {
-            const activity = {
-                type: type,
-                details: details,
-                timestamp: new Date().toISOString()
-            };
-            let storedLogs = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY)) || [];
-            storedLogs.push(activity);
-            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(storedLogs));
-        }
+    // Periodically send logs every 10 seconds
+    setInterval(sendStoredLogs, SEND_INTERVAL);
 
-        function sendStoredLogs() {
-            console.log("Sending Logs==", new Date());
-            let storedLogs = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY)) || [];
-            if (storedLogs.length > 0) {
-                sendActivityLog(storedLogs);
-                localStorage.removeItem(LOCAL_STORAGE_KEY);
-            }
-        }
+    document.addEventListener('mousemove', (event) => {
+        logActivity('mousemove', { x: event.clientX, y: event.clientY });
+    });
 
-        // Periodically send logs every 10 seconds
-        setInterval(sendStoredLogs, SEND_INTERVAL);
+    document.addEventListener('click', (event) => {
+        logActivity('click', { x: event.clientX, y: event.clientY });
+    });
 
-        document.addEventListener('mousemove', (event) => {
-            logActivity('mousemove', { x: event.clientX, y: event.clientY });
-        });
+    document.addEventListener('scroll', (event) => {
+        logActivity('click', { x: event.clientX, y: event.clientY });
+    });
+</script>
 
-        document.addEventListener('click', (event) => {
-            logActivity('click', { x: event.clientX, y: event.clientY });
-        });
-    </script>
 </html>
