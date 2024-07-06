@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Activity Heatmap</title>
+    <script src="https://cdn.jsdelivr.net/npm/heatmap.js@2.0.5/build/heatmap.min.js"></script>
+    <style>
+        #heatmapContainer {
+            width: 100%;
+            height: 100vh;
+            position: relative;
+        }
+        #sessionList {
+            margin: 20px;
+        }
+        .session-row {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="heatmapContainer"></div>
+    <div id="sessionList">
+        <h3>Sessions</h3>
+        <ul id="sessions"></ul>
+    </div>
+    
+    <script>
+        function fetchSessions() {
+            fetch('/sessions/')
+                .then(response => response.json())
+                .then(data => {
+                    const sessionList = document.getElementById('sessions');
+                    sessionList.innerHTML = '';
+                    data.forEach(session => {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = `Session ID: ${session.session_id} - Active: ${session.active}`;
+                        listItem.classList.add('session-row');
+                        listItem.onclick = () => generateHeatmap(session.session_id);
+                        const deleteButton = document.createElement('button');
+                        deleteButton.textContent = 'Delete';
+                        deleteButton.onclick = (event) => {
+                            event.stopPropagation();
+                            deleteSession(session.session_id);
+                        };
+                        listItem.appendChild(deleteButton);
+                        sessionList.appendChild(listItem);
+                    });
+                })
+                .catch(error => console.error('Error loading sessions:', error));
+        }
+
+        function generateHeatmap(sessionId) {
+            fetch(`/sessions/${sessionId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    const heatmapInstance = h337.create({
+                        container: document.querySelector('#heatmapContainer')
+                    });
+
+                    const points = data.map(item => ({
+                        x: item[0], // x coordinate
+                        y: item[1], // y coordinate
+                        value: 1  // Assuming all points have the same value
+                    }));
+
+                    const heatmapData = {
+                        max: 10,
+                        data: points
+                    };
+
+                    console.log('Heatmap data:', heatmapData);  // Debugging line
+                    heatmapInstance.setData(heatmapData);
+                })
+                .catch(error => console.error('Error loading heatmap data:', error));
+        }
+
+        function deleteSession(sessionId) {
+            fetch(`/sessions/${sessionId}/delete/`, {
+                method: 'DELETE'
+            })
+            .then(response => {
+                if (response.ok) {
+                    fetchSessions();
+                } else {
+                    console.error('Failed to delete session');
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', fetchSessions);
+    </script>
+</body>
+</html>
