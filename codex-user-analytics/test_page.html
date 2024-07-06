@@ -83,5 +83,61 @@
     
 
 </body>
+ <script>
 
+    // Caputure user mouse activity and store in localstorage
+    // Send logs after every 10 seconds to backend
+    // clear localstorage after sent to backend
+
+        const ws = new WebSocket('ws://localhost:3000');
+        const LOCAL_STORAGE_KEY = 'activityLogs';
+        const SEND_INTERVAL = 10000; // 10 seconds
+
+        ws.onopen = () => {
+            console.log('Connected to server');
+        };
+
+        ws.onclose = () => {
+            console.log('Disconnected from server');
+        };
+
+        function sendActivityLog(activityLogs) {
+            if (ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ userId: 1, activityLogs })); // user id is hardcoded for now 
+            } else {
+                console.error('WebSocket is not open');
+            }
+        }
+
+        function logActivity(type, details) {
+            const activity = {
+                type: type,
+                details: details,
+                timestamp: new Date().toISOString()
+            };
+            let storedLogs = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY)) || [];
+            storedLogs.push(activity);
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(storedLogs));
+        }
+
+        function sendStoredLogs() {
+            console.log("Sending Logs==", new Date());
+            let storedLogs = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY)) || [];
+            if (storedLogs.length > 0) {
+                sendActivityLog(storedLogs);
+                localStorage.removeItem(LOCAL_STORAGE_KEY);
+            }
+        }
+
+        // Periodically send logs every 10 seconds
+        setInterval(sendStoredLogs, SEND_INTERVAL);
+
+        document.addEventListener('mousemove', (event) => {
+            logActivity('mousemove', { x: event.clientX, y: event.clientY });
+        });
+
+        document.addEventListener('click', (event) => {
+            logActivity('click', { x: event.clientX, y: event.clientY });
+        });
+    </script>
 </html>
