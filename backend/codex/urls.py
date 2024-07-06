@@ -1,5 +1,5 @@
 """
-URL configuration for oneliner project.
+URL configuration for codex project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/5.0/topics/http/urls/
@@ -16,10 +16,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from channels.routing import ProtocolTypeRouter, URLRouter
+from channels.auth import AuthMiddlewareStack
 from . import views
+from . import socketHandler
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/prompt', views.simple_chat_bot_view, name='simpleChatbotView'),
-    path('api/prompt-history', views.simple_chat_bot_with_history_view, name='simpleChatbotWithHistoryView')
+    path('api/prompt-history', views.simple_chat_bot_with_history_view, name='simpleChatbotWithHistoryView'),
 ]
