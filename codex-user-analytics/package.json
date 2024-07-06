@@ -1,0 +1,15 @@
+{
+  "name": "codex-user-analytics",
+  "version": "1.0.0",
+  "description": "This will be the plugin that need to be installed in user HTML for retrieving user activities",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "websocket": "^1.0.35"
+  }
+}
