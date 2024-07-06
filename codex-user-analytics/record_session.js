@@ -1,10 +1,12 @@
-
-    const socket = new WebSocket('ws://localhost:8000/ws/recordings/');
+    const socket = new WebSocket('ws://localhost:8000/ws/recordings/ ' );
 
     socket.onopen = function(event) {
         rrweb.record({
             emit(event) {
-                socket.send(JSON.stringify(event));
+                socket.send(JSON.stringify({
+                    event_name: 'recording',
+                    event_data: event
+                }));
             }
         });
     };
