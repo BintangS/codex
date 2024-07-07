@@ -11,6 +11,8 @@
     <img src="./frontend/src/assets/homepage.png" style="margin-top:10px;margin-bottom:10px" alt="Signa Product Page" width="750"></a>
 </h1>
 
+Inshaa Allah, بِسْمِ ٱللَّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ - Anaflow Team Will Win
+
 # Core Features 1 - User Simulation's Data & Insight
 1. **ReplaySession** - Rewind the user's complete journey and gain insights into their behavior to uncover hidden patterns
 2. **Heatmaps** - Identify which areas are overlooked and discover the elements that matters
