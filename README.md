@@ -1,6 +1,24 @@
-# Codex 
-## Your solution for user insights and product analytics
-Read me will be provided later
+<h1 align="center">
+    <a href="#">
+        <img src="./frontend/src/assets/anaflow.png" style="margin-top:10px;margin-bottom:10px;width:150px;" alt="Signa Logo" width="1500">
+    </a>
+</h1>
+
+# CodeX Challenge  - Anaflow | AI Solution for Platform Analytics
+## Become the Best Version of Your Platform - Catch Opportunities, Not Feelings
+
+<h1 align="center">
+    <img src="./frontend/src/assets/homepage.png" style="margin-top:10px;margin-bottom:10px" alt="Signa Product Page" width="750"></a>
+</h1>
+
+# Core Features 1 - User Simulation's Data & Insight
+1. **ReplaySession** - Rewind the user's complete journey and gain insights into their behavior to uncover hidden patterns
+2. **Heatmaps** - Identify which areas are overlooked and discover the elements that matters
+   
+These both features can export the data into JSON format for further usage
+
+# Core Features 2 - AI Simulation (Fine-Tuned LLM by Google Gemini)
+Reimagine varied selections of user profiles and proceed with the simulation seamlessly.
 
 # Project Architecture and Tech Stack
 This repository follows a monorepo structure, encompassing both the Frontend and Backend components of the application.
