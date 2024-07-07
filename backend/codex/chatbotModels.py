@@ -9,6 +9,19 @@ from langchain_core.runnables.history import RunnableWithMessageHistory
 
 load_dotenv()
 
+required_categories = {
+    "age": "Can you please tell me your age?",
+    "gender": "What is your gender?",
+    "interests": "What are your interests?",
+    "location": "Where do you live?",
+    "education_level": "What is your education level?",
+    "occupation": "What is your occupation?",
+    "previous_experience": "What is your previous experience with the site?",
+    "internet_proficiency": "How proficient are you with the internet?",
+    "device": "Do you use a mobile device or desktop?",
+    "behavioral_traits": "Can you describe any specific behavioral traits you have?",
+}
+
 # TODO: implement simple chat history to keep track of the conversation
 class ChatbotModels:
     # store the chat history in memory
@@ -34,13 +47,38 @@ class ChatbotModels:
         
         print(f"Session ID: {sessionId}")
 
-        config = {"configurable": {"session_id": sessionId}}
+        if sessionId not in self.store:
+            self.store[sessionId] = {"history": ChatMessageHistory(), "profile": {}}
 
-        return self.with_message_history.invoke([
+        # Update the profile with the new prompt
+        self.update_profile(sessionId, prompt)
+
+        # Check if we have collected all required categories
+        missing_categories = self.get_missing_categories(sessionId)
+        if not missing_categories:
+            return json.dumps(self.store[sessionId]['profile'])
+
+        # Generate the next question to ask
+        next_question = required_categories[missing_categories[0]]
+        
+        response = self.with_message_history.invoke([
             HumanMessage(content=prompt),
-        ], config=config).content
-    
-    def get_session_history(self: object, session_id: str) -> BaseChatMessageHistory:
-        if session_id not in self.store:
-            self.store[session_id] = ChatMessageHistory()
-        return self.store[session_id]
+            AIMessage(content=next_question)
+        ], config={"configurable": {"session_id": sessionId}})
+        
+        return response.content
+
+    def update_profile(self, session_id, prompt):
+        # Use a simple rule-based approach to update profile. For more complex cases, NLP can be used.
+        tokens = prompt.split()
+        for category in required_categories.keys():
+            if category not in self.store[session_id]['profile'] and any(word in prompt.lower() for word in category.split()):
+                self.store[session_id]['profile'][category] = " ".join(tokens)
+                break
+
+    def get_missing_categories(self, session_id):
+        profile = self.store[session_id]['profile']
+        return [category for category in required_categories.keys() if category not in profile]
+
+    def get_session_history(self, session_id: str) -> BaseChatMessageHistory:
+        return self.store[session_id]["history"] if session_id in self.store else ChatMessageHistory()
