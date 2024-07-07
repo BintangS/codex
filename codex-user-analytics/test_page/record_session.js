@@ -1,6 +1,4 @@
-console.log("is this working?");
-console.log(rrweb);
-
+// TODO: package rrweb into this module
 // TODO: generate random session id based on uuid timestamp
 const sessionId = '123'
 const socket = new WebSocket('ws://localhost:8000/ws/recordings/' + sessionId + '/');
